@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1f1a"/>
+      <stop offset="1" stop-color="#1c1410"/>
+    </linearGradient>
+    <linearGradient id="titulo" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#25d366"/>
+      <stop offset="1" stop-color="#e8915b"/>
+    </linearGradient>
+    <filter id="desfoque" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="40"/></filter>
+    <clipPath id="digitar">
+      <rect x="40" y="148" height="30" width="0">
+        <animate attributeName="width" values="0;480;480;0" keyTimes="0;0.35;0.9;1" dur="9s" repeatCount="indefinite"/>
+      </rect>
+    </clipPath>
+    <style>
+      .bolha { opacity: 0; transform-box: fill-box; transform-origin: center; animation: pop 9s infinite; }
+      .b1 { animation-delay: 0.6s; }
+      .b2 { animation-delay: 2.4s; }
+      .b3 { animation-delay: 4.2s; }
+      .b4 { animation-delay: 5.6s; }
+      @keyframes pop {
+        0%   { opacity: 0; transform: translateY(10px) scale(.95); }
+        5%   { opacity: 1; transform: translateY(0) scale(1); }
+        70%  { opacity: 1; transform: translateY(0) scale(1); }
+        78%  { opacity: 0; transform: translateY(-6px) scale(1); }
+        100% { opacity: 0; }
+      }
+      .digitando circle { animation: pulo 1.2s infinite; }
+      .digitando circle:nth-child(2) { animation-delay: .15s; }
+      .digitando circle:nth-child(3) { animation-delay: .3s; }
+      @keyframes pulo { 0%,60%,100% { transform: translateY(0); opacity:.5 } 30% { transform: translateY(-4px); opacity:1 } }
+      .dig { opacity: 0; animation: digv 9s infinite; }
+      .d1 { animation-delay: 1.4s; }
+      .d2 { animation-delay: 4.6s; }
+      @keyframes digv { 0% {opacity:0} 2% {opacity:1} 10% {opacity:1} 11% {opacity:0} 100% {opacity:0} }
+      .cursor { animation: pisca 1s steps(1) infinite; }
+      @keyframes pisca { 50% { opacity: 0; } }
+      .brilho { animation: brilho 4s ease-in-out infinite; }
+      @keyframes brilho { 0%,100% { opacity: .25 } 50% { opacity: .55 } }
+    </style>
+  </defs>
+
+  <rect width="900" height="300" rx="18" fill="url(#bg)"/>
+  <circle class="brilho" cx="760" cy="60" r="140" fill="#25d366" opacity=".25" filter="url(#desfoque)"/>
+  <circle class="brilho" cx="120" cy="280" r="120" fill="#e8915b" opacity=".2" filter="url(#desfoque)"/>
+
+  <!-- Título -->
+  <text x="40" y="92" font-size="40" font-weight="800" fill="url(#titulo)">whatsapp-claude-bridge</text>
+  <text x="40" y="126" font-size="17" fill="#cfd8d3">Seu Claude no WhatsApp, um grupo para cada assunto.</text>
+
+  <g clip-path="url(#digitar)">
+    <text x="40" y="170" font-size="16" fill="#25d366" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">$ claude -p "paguei 230 no mercado" --continue</text>
+  </g>
+
+  <!-- Chips -->
+  <g font-size="13" font-weight="600">
+    <rect x="40" y="206" width="104" height="30" rx="15" fill="#25d366" fill-opacity=".15" stroke="#25d366" stroke-opacity=".6"/>
+    <text x="92" y="226" text-anchor="middle" fill="#7ff0a9">Evolution</text>
+    <rect x="154" y="206" width="70" height="30" rx="15" fill="#ea4b71" fill-opacity=".15" stroke="#ea4b71" stroke-opacity=".6"/>
+    <text x="189" y="226" text-anchor="middle" fill="#ff9db4">n8n</text>
+    <rect x="234" y="206" width="116" height="30" rx="15" fill="#e8915b" fill-opacity=".15" stroke="#e8915b" stroke-opacity=".6"/>
+    <text x="292" y="226" text-anchor="middle" fill="#ffc49d">Claude Code</text>
+    <rect x="360" y="206" width="98" height="30" rx="15" fill="#4aa3ff" fill-opacity=".15" stroke="#4aa3ff" stroke-opacity=".6"/>
+    <text x="409" y="226" text-anchor="middle" fill="#a8d2ff">Docker</text>
+  </g>
+
+  <!-- Celular -->
+  <g transform="translate(560,22)">
+    <rect width="300" height="256" rx="22" fill="#0e1512" stroke="#2c3a34" stroke-width="2"/>
+    <rect x="0" y="0" width="300" height="46" rx="22" fill="#1f2c33"/>
+    <rect x="0" y="24" width="300" height="22" fill="#1f2c33"/>
+    <circle cx="28" cy="23" r="13" fill="#25d366"/>
+    <path d="M22 23 l4 4 l8 -9" stroke="#0e1512" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <text x="50" y="21" font-size="13" font-weight="700" fill="#e9edef">Viagem</text>
+    <text x="50" y="36" font-size="11" fill="#8696a0">você, Bruno, Carla, Davi</text>
+
+    <!-- mensagem 1: usuário -->
+    <g class="bolha b1">
+      <rect x="96" y="60" width="192" height="40" rx="10" fill="#005c4b"/>
+      <text x="106" y="78" font-size="12" fill="#e9edef">Paguei 230 no mercado,</text>
+      <text x="106" y="93" font-size="12" fill="#e9edef">divide com todos</text>
+    </g>
+    <!-- digitando -->
+    <g class="dig d1">
+      <rect x="12" y="110" width="56" height="26" rx="10" fill="#1f2c33"/>
+      <g class="digitando" fill="#8696a0"><circle cx="28" cy="123" r="3"/><circle cx="40" cy="123" r="3"/><circle cx="52" cy="123" r="3"/></g>
+    </g>
+    <!-- mensagem 2: bot -->
+    <g class="bolha b2">
+      <rect x="12" y="110" width="210" height="40" rx="10" fill="#1f2c33"/>
+      <text x="22" y="128" font-size="12" fill="#e9edef">🤖 Anotado! R$ 230,00 ÷ 4</text>
+      <text x="22" y="143" font-size="12" fill="#e9edef">= R$ 57,50 para cada.</text>
+    </g>
+    <!-- mensagem 3: usuário -->
+    <g class="bolha b3">
+      <rect x="148" y="160" width="140" height="26" rx="10" fill="#005c4b"/>
+      <text x="158" y="177" font-size="12" fill="#e9edef">quem deve quanto?</text>
+    </g>
+    <g class="dig d2">
+      <rect x="12" y="196" width="56" height="26" rx="10" fill="#1f2c33"/>
+      <g class="digitando" fill="#8696a0"><circle cx="28" cy="209" r="3"/><circle cx="40" cy="209" r="3"/><circle cx="52" cy="209" r="3"/></g>
+    </g>
+    <!-- mensagem 4: bot -->
+    <g class="bolha b4">
+      <rect x="12" y="196" width="230" height="40" rx="10" fill="#1f2c33"/>
+      <text x="22" y="214" font-size="12" fill="#e9edef">🤖 Bruno, Carla e Davi pagam</text>
+      <text x="22" y="229" font-size="12" fill="#e9edef">R$ 57,50 cada para você.</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,135 @@
+{
+  "name": "WhatsApp → Claude (grupos)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "evolution-claude",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "a1",
+      "name": "Webhook Evolution",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "6f0c1a52-4b7e-4f4e-9a51-claudebridge01"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ================== CONFIGURAÇÃO (edite aqui) ==================\nconst CONFIG = {\n  // Endereços internos dos serviços (rede Docker do seu painel).\n  // Easypanel: http://<projeto>_<serviço>:<porta> | Dokploy: nome interno da aplicação\n  bridgeUrl: 'http://SEUPROJETO_claude-bridge:3000',\n  bridgeToken: 'TROQUE-PELO-BRIDGE_TOKEN',\n  evolutionUrl: 'http://SEUPROJETO_evolution-api:8080',\n  evolutionApiKey: 'TROQUE-PELA-APIKEY-DO-EVOLUTION',\n  instancia: 'NOME-DA-INSTANCIA',\n\n  // true  = o número conectado no Evolution é o SEU (você fala num grupo só seu;\n  //         suas mensagens chegam como fromMe)\n  // false = o Evolution usa um número separado (o \"bot\"); você manda do seu número\n  numeroProprio: true,\n\n  // Toda resposta do Claude começa com isto. Mensagens que começam com isto são\n  // ignoradas, para o Claude não responder a si mesmo.\n  prefixoBot: '🤖 ',\n\n  // JID do grupo -> pasta do grupo no claude-bridge\n  grupos: {\n    // '120363000000000001@g.us': 'meu-claude',\n    // '120363000000000002@g.us': 'minha-api',\n    // '120363000000000003@g.us': 'viagem',\n  },\n\n  // Só vale quando numeroProprio = false. Vazio = qualquer pessoa do grupo.\n  remetentesPermitidos: [\n    // '5531999999999@s.whatsapp.net',\n  ],\n};\n// ===============================================================\n\nconst body = $json.body || $json;\nif (body.event !== 'messages.upsert' || !body.data || !body.data.key) return [];\n\nconst d = body.data;\nconst key = d.key;\nconst jid = key.remoteJid || '';\nconst pasta = CONFIG.grupos[jid];\nif (!pasta) return []; // grupo não cadastrado: ignora\n\nconst m = d.message || {};\nconst texto = (\n  m.conversation ||\n  (m.extendedTextMessage && m.extendedTextMessage.text) ||\n  (m.imageMessage && m.imageMessage.caption) ||\n  (m.documentMessage && m.documentMessage.caption) ||\n  ''\n).trim();\n\n// Evita laço: nunca reage às próprias respostas\nif (texto.startsWith(CONFIG.prefixoBot.trim())) return [];\n\nif (CONFIG.numeroProprio) {\n  if (!key.fromMe) return []; // no modo número próprio, só você fala\n} else {\n  if (key.fromMe) return [];\n  const remetente = key.participant || d.participant || '';\n  if (CONFIG.remetentesPermitidos.length && !CONFIG.remetentesPermitidos.includes(remetente)) return [];\n}\n\nconst payload = { grupo: pasta, texto, remetente: d.pushName || '' };\n\nconst tipo = d.messageType || Object.keys(m)[0] || '';\nif (tipo === 'imageMessage' || tipo === 'documentMessage') {\n  const midia = m[tipo] || {};\n  if (m.base64) {\n    payload.arquivo = {\n      base64: m.base64,\n      mimetype: midia.mimetype || '',\n      nome: midia.fileName || (tipo === 'imageMessage' ? 'foto' : 'documento'),\n    };\n  } else {\n    payload.texto += '\\n[Chegou um arquivo, mas o Evolution não mandou o conteúdo. Avise que é preciso ligar \"Webhook Base64\" na instância.]';\n  }\n} else if (tipo === 'audioMessage') {\n  payload.texto = '[O usuário mandou um áudio. A transcrição ainda não está ativada: avise isso numa frase e peça para mandar por texto.]';\n}\n\nif (!payload.texto.trim() && !payload.arquivo) return [];\n\nreturn [{\n  json: {\n    jid,\n    payload,\n    bridgeUrl: CONFIG.bridgeUrl,\n    bridgeToken: CONFIG.bridgeToken,\n    evolutionUrl: CONFIG.evolutionUrl,\n    evolutionApiKey: CONFIG.evolutionApiKey,\n    instancia: CONFIG.instancia,\n    prefixoBot: CONFIG.prefixoBot,\n  },\n}];\n"
+      },
+      "id": "a2",
+      "name": "Filtrar e montar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.bridgeUrl }}/mensagem",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Bridge-Token",
+              "value": "={{ $json.bridgeToken }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.payload) }}",
+        "options": {
+          "timeout": 240000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "a3",
+      "name": "Enviar ao Claude",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Filtrar e montar').item.json.evolutionUrl }}/message/sendText/{{ $('Filtrar e montar').item.json.instancia }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Filtrar e montar').item.json.evolutionApiKey }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $('Filtrar e montar').item.json.jid, text: $('Filtrar e montar').item.json.prefixoBot + ($json.resposta || ('⚠️ ' + ($json.erro || 'erro sem detalhe no claude-bridge'))) }) }}",
+        "options": {}
+      },
+      "id": "a4",
+      "name": "Responder no WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Evolution": {
+      "main": [
+        [
+          {
+            "node": "Filtrar e montar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar e montar": {
+      "main": [
+        [
+          {
+            "node": "Enviar ao Claude",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar ao Claude": {
+      "main": [
+        [
+          {
+            "node": "Responder no WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

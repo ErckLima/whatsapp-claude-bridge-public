@@ -1,0 +1,6 @@
+{
+  "permissions": {
+    "allow": ["Read", "Glob", "Bash(curl:*)", "Bash(date:*)"],
+    "deny": ["Read(/data/claude-config/**)"]
+  }
+}

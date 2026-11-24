@@ -1,0 +1,22 @@
+# Uso sem painel: sobe só o claude-bridge, na mesma rede Docker do seu n8n.
+#   cp bridge/.env.example bridge/.env   (preencha)
+#   REDE_DOCKER=<rede-do-n8n> docker compose up -d --build
+services:
+  claude-bridge:
+    build: ./bridge
+    container_name: claude-bridge
+    restart: unless-stopped
+    env_file: ./bridge/.env
+    volumes:
+      - dados:/data
+    networks:
+      - rede
+    # Sem "ports": o serviço não fica exposto fora da rede Docker.
+
+volumes:
+  dados:
+
+networks:
+  rede:
+    external: true
+    name: ${REDE_DOCKER:-n8n_default}
